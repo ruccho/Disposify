@@ -1,0 +1,15 @@
+﻿{
+  "name": "com.ruccho.disposify",
+  "version": "0.1.0",
+  "displayName": "Disposify",
+  "description": "Subscribe C# events with IDisposable!",
+  "unity": "2022.3",
+  "unityRelease": "12f1",
+  "dependencies": {
+  },
+  "keywords": [],
+  "author": {
+    "name": "ruccho",
+    "url": "https://ruccho.com"
+  }
+}

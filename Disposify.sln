@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify.Generators", "Disposify.Generators\Disposify.Generators.csproj", "{10992AEC-EB7C-4108-B620-D46EE50F43E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify", "Disposify\Disposify.csproj", "{8E9C27C8-6C6E-4964-B90D-B04179AF93B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify.Tests", "Disposify.Tests\Disposify.Tests.csproj", "{B3E42A57-1498-4EE2-A443-C22A2777CFB6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10992AEC-EB7C-4108-B620-D46EE50F43E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10992AEC-EB7C-4108-B620-D46EE50F43E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10992AEC-EB7C-4108-B620-D46EE50F43E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10992AEC-EB7C-4108-B620-D46EE50F43E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E9C27C8-6C6E-4964-B90D-B04179AF93B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E9C27C8-6C6E-4964-B90D-B04179AF93B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E9C27C8-6C6E-4964-B90D-B04179AF93B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E9C27C8-6C6E-4964-B90D-B04179AF93B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

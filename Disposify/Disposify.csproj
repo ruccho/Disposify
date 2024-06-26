@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>9</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Compile Include="../Disposify.Unity/Packages/com.ruccho.disposify/Runtime/Scripts/**/*.cs" Link="." />
+    </ItemGroup>
+
+</Project>
