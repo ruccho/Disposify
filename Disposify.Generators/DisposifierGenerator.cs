@@ -42,7 +42,8 @@ public class DisposifierGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(
             provider.Collect().Select((types, ct) =>
-                types.Distinct<ITypeSymbol>(SymbolEqualityComparer.Default).ToArray()),
+                    types.Distinct<ITypeSymbol>(SymbolEqualityComparer.Default).ToArray())
+                .Combine(context.CompilationProvider),
             Emit);
 
         var attributeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -50,13 +51,16 @@ public class DisposifierGenerator : IIncrementalGenerator
             (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax,
             (syntaxContext, _) => syntaxContext
         );
-        context.RegisterSourceOutput(attributeProvider, Emit);
+        context.RegisterSourceOutput(attributeProvider.Combine(context.CompilationProvider), Emit);
     }
 
     #endregion
 
-    private void Emit(SourceProductionContext sourceContext, GeneratorAttributeSyntaxContext attributeContext)
+    private void Emit(SourceProductionContext sourceContext,
+        (GeneratorAttributeSyntaxContext attributeContext, Compilation compilation) context)
     {
+        var (attributeContext, compilation) = context;
+
         if (attributeContext.TargetSymbol is not INamedTypeSymbol typeSymbol) return;
 
         StringBuilder sourceBuilder = new();
@@ -82,7 +86,7 @@ public class DisposifierGenerator : IIncrementalGenerator
         {
             if (attributeData.ConstructorArguments.Length != 1) continue;
             if (attributeData.ConstructorArguments[0].Value is not ITypeSymbol targetTypeSymbol) continue;
-            EmitDisposifierBody(sourceBuilder, targetTypeSymbol, typeSymbol.IsStatic, true);
+            EmitDisposifierBody(sourceBuilder, targetTypeSymbol, compilation, typeSymbol.IsStatic, true);
         }
 
         sourceBuilder.AppendLine(
@@ -98,8 +102,10 @@ public class DisposifierGenerator : IIncrementalGenerator
         sourceContext.AddSource($"{fileNameIdentifier}.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
 
-    private void Emit(SourceProductionContext sourceContext, ITypeSymbol?[] types)
+    private void Emit(SourceProductionContext sourceContext, (ITypeSymbol?[] types, Compilation compilation) context)
     {
+        var (types, compilation) = context;
+
         StringBuilder sourceBuilder = new();
 
         sourceBuilder.AppendLine("#nullable enable");
@@ -152,7 +158,7 @@ public class DisposifierGenerator : IIncrementalGenerator
                         {
                 """);
 
-            EmitDisposifierBody(sourceBuilder, type, false, false);
+            EmitDisposifierBody(sourceBuilder, type, compilation, false, false);
 
             sourceBuilder.AppendLine(
 /* lang=c#  */"""        }""");
@@ -170,7 +176,8 @@ public class DisposifierGenerator : IIncrementalGenerator
         sourceContext.AddSource("Disposifiers.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
 
-    private static void EmitDisposifierBody(StringBuilder sourceBuilder, ITypeSymbol type, bool isStatic,
+    private static void EmitDisposifierBody(StringBuilder sourceBuilder, ITypeSymbol type, Compilation compilation,
+        bool isStatic,
         bool emitStaticAsStatic)
     {
         var fqName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -183,7 +190,10 @@ public class DisposifierGenerator : IIncrementalGenerator
 
                   """);
 
-        foreach (var eventSymbol in type.GetMembers().OfType<IEventSymbol>())
+        foreach (var eventSymbol in type.GetMembers().OfType<IEventSymbol>().Where(e =>
+                     e.DeclaredAccessibility == Accessibility.Public ||
+                     (SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly) &&
+                      e.DeclaredAccessibility is Accessibility.Internal or Accessibility.ProtectedOrInternal)))
         {
             if (isStatic && !eventSymbol.IsStatic) continue;
             var isEventStatic = eventSymbol.IsStatic;
