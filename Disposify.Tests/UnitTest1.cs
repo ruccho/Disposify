@@ -92,6 +92,11 @@ public class C1
 {
     public static event Func<int, int>? SomeEventStatic;
     public event Func<int, int>? SomeEvent;
+    private event Func<int, int>? SomeEvent1;
+    protected event Func<int, int>? SomeEvent2;
+    protected internal event Func<int, int>? SomeEvent3;
+    private protected event Func<int, int>? SomeEvent4;
+    internal event Func<int, int>? SomeEvent6;
 
     public static int InvokeStatic(int a)
     {
