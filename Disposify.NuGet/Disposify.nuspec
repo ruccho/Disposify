@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>Disposify</id>
-        <version>0.1.0</version>
+        <version>0.1.1</version>
         <authors>ruccho</authors>
         <description>Disposify is a source generator to subscribe / unsubscribe C# events with using-IDisposable
             pattern.
