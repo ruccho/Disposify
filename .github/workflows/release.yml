@@ -25,5 +25,5 @@ jobs:
           PROJECT_FILE_PATH: Disposify.NuGet/Disposify.NuGet.csproj
           BUILD_CONFIGURATION: Release
           PACKAGE_NAME: Disposify
-          VERSION_STATIC: ${{GITHUB_ENV.VERSION}}
+          VERSION_STATIC: ${{env.VERSION}}
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
