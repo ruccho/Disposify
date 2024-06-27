@@ -7,9 +7,10 @@ on:
 jobs:
   publish-nuget:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+      - name: get tag name
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -22,4 +23,7 @@ jobs:
         uses: brandedoutcast/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Disposify.NuGet/Disposify.NuGet.csproj
+          BUILD_CONFIGURATION: Release
+          PACKAGE_NAME: Disposify
+          VERSION_STATIC: ${{GITHUB_ENV.VERSION}}
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
