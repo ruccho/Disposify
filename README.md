@@ -3,7 +3,7 @@
 > [!WARNING]
 > Currently very experimental.
 
-Disposify is a source generator to subscribe / unsubscribe C# events with using-IDisposable pattern.
+Disposify is a source generator to subscribe / unsubscribe C# events with using-dispose pattern.
 
 ```csharp
 using System;
@@ -49,7 +49,7 @@ public class C
 
 ### NuGet
 
-WIP
+Install from https://www.nuget.org/packages/Disposify/ .
 
 ### Unity
 
@@ -72,14 +72,14 @@ https://github.com/ruccho/Disposify.git?path=/Disposify.Unity/Packages/com.rucch
 
 ## Performance
 
- - Instances of `IDisposable` is automatically pooled after the disposal.
- - `Disposify()` seems to return `dynamic` but they are replaced with specialized overloads by source generator. There are no boxing allocations.
+ - Returned `IDisposable`s are automatically pooled after the disposal.
+ - `Disposify()` seems to return `dynamic` but is replaced by performant overload (no dynamic, no boxed) by the source generator.
 
 ## Usages
 
 ### Disposifying static events
 
-Use `((T)null).Disposify()`.
+For **instance** types, use `((T)null).Disposify()`.
 
 ```csharp
 using System;
@@ -90,9 +90,34 @@ using (((C)null).Disposify().SomeEvent(v => ++v))
     C.Invoke(100);
 }
 
-public static class C
+public class C
 {
     public static event Func<int, int>? SomeEvent;
     public static int Invoke(int a) => SomeEvent.Invoke(a);
 }
 ```
+
+For **static** types, use `[GenerateDisposifier(typeof(T))]`.
+
+```csharp
+using System;
+using Disposify;
+
+using (C_Disposifier.SomeEvent(v => ++v))
+{
+    C.Invoke(100);
+}
+
+public static class C
+{
+    public static event Func<int, int>? SomeEvent;
+    public static int Invoke(int a) => SomeEvent.Invoke(a);
+}
+
+[GenerateDisposifier(typeof(C))]
+static partial class C_Disposifier 
+{
+    // members will be generated
+}
+```
+
