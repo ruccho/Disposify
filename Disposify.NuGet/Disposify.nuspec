@@ -12,6 +12,7 @@
             <group targetFramework=".NETStandard2.1"/>
         </dependencies>
         <readme>README.md</readme>
+        <license type="expression">MIT</license>
     </metadata>
     <files>
         <file target="\" src="..\README.md"/>
