@@ -1,0 +1,25 @@
+name: Publish - Nuget
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-nuget:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: .
+      - name: Build
+        run: dotnet build Disposify.sln --no-restore
+      - name: Publish to NuGet
+        uses: brandedoutcast/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Disposify.NuGet/Disposify.NuGet.csproj
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
