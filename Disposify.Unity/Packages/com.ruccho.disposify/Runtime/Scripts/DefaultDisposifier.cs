@@ -18,15 +18,15 @@ namespace Disposify
             TargetType = typeForStatic;
         }
 
-        private object? Target { get; }
+        private object Target { get; }
         private Type TargetType { get; }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            BindingFlags flags = Target != null
+            var flags = Target != null
                 ? BindingFlags.Public | BindingFlags.Instance
                 : BindingFlags.Public | BindingFlags.Static;
-        
+
             var @event = TargetType.GetEvent(binder.Name, flags);
 
             if (@event != null)
@@ -37,6 +37,8 @@ namespace Disposify
 
             return base.TryGetMember(binder, out result);
         }
+
+        #region Nested type: Subscriber
 
         private class Subscriber : DynamicObject
         {
@@ -59,5 +61,7 @@ namespace Disposify
                 return true;
             }
         }
+
+        #endregion
     }
 }

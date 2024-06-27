@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Threading;
@@ -36,15 +38,15 @@ namespace Disposify
             return !left.Equals(right);
         }
 
-        public static Disposable Create<T, TDelegate>(T target, TDelegate @delegate, Action<T, TDelegate> unregister)
+        public static Disposable Create<T, TDelegate>(T? target, TDelegate @delegate, Action<T, TDelegate> unregister)
             where T : class where TDelegate : Delegate
         {
-            return new Disposable(target, @delegate, As<Action<T, TDelegate>, Action<object, object>>(unregister));
+            return new Disposable(target, @delegate, As<Action<T, TDelegate>, Action<object?, object>>(unregister));
         }
 
         private static unsafe TTo As<TFrom, TTo>(TFrom from) where TFrom : class where TTo : class
         {
-            return ((delegate*<TFrom, TTo>)(delegate*<object, object>)&AsRaw)(from);
+            return ((delegate*<TFrom, TTo>)(delegate*<object, object>)(&AsRaw))(from);
         }
 
         private static object AsRaw(object target)
@@ -52,11 +54,11 @@ namespace Disposify
             return target;
         }
 
-        private Disposable(object target, object @delegate, Action<object, object> unregister)
+        private Disposable(object? target, object @delegate, Action<object?, object> unregister)
         {
             var core = DisposableCore.Get(target, @delegate, unregister);
             this.core = core;
-            this.version = core.Version;
+            version = core.Version;
         }
 
         public void Dispose()
@@ -64,11 +66,26 @@ namespace Disposify
             core.Dispose(version);
         }
 
-        class DisposableCore
+        private class DisposableCore
         {
             private static readonly ConcurrentStack<DisposableCore> Pool = new();
+            private object @delegate;
 
-            public static DisposableCore Get(object target, object @delegate, Action<object, object> unregister)
+            private object? target;
+            private Action<object?, object> unregister;
+
+            private int version;
+
+            public DisposableCore(object? target, object @delegate, Action<object?, object> unregister)
+            {
+                this.target = target;
+                this.@delegate = @delegate;
+                this.unregister = unregister;
+            }
+
+            public int Version => version;
+
+            public static DisposableCore Get(object? target, object @delegate, Action<object?, object> unregister)
             {
                 if (Pool.TryPop(out var result))
                 {
@@ -82,21 +99,6 @@ namespace Disposify
                 }
 
                 return result;
-            }
-
-            public int Version => version;
-
-            private int version = 0;
-
-            private object target;
-            private object @delegate;
-            private Action<object, object> unregister;
-
-            public DisposableCore(object target, object @delegate, Action<object, object> unregister)
-            {
-                this.target = target;
-                this.@delegate = @delegate;
-                this.unregister = unregister;
             }
 
             public void Dispose(int version)

@@ -22,8 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Disposify.Generators\Disposify.Generators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
-      <ProjectReference Include="..\Disposify\Disposify.csproj"/>
+        <ProjectReference Include="..\Disposify.Generators\Disposify.Generators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer"/>
+        <ProjectReference Include="..\Disposify\Disposify.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,18 +11,17 @@ namespace Disposify.Generators;
 [Generator]
 public class DisposifierGenerator : IIncrementalGenerator
 {
-    private static SymbolDisplayFormat FullyQualifiedNoGlobalNamespace =
-        SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted);
-
     private const string DefaultDisposifierExtensionCode =
-/* lang=c#  */$$"""
-                namespace Disposify
-                {
-                    internal static partial class DisposifyInternal
-                    {
-                    }
-                }
-                """;
+/* lang=c#  */"""
+              namespace Disposify
+              {
+                  internal static partial class DisposifyInternal
+                  {
+                  }
+              }
+              """;
+
+    #region IIncrementalGenerator Members
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -46,24 +44,77 @@ public class DisposifierGenerator : IIncrementalGenerator
             provider.Collect().Select((types, ct) =>
                 types.Distinct<ITypeSymbol>(SymbolEqualityComparer.Default).ToArray()),
             Emit);
+
+        var attributeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
+            "Disposify.GenerateDisposifierAttribute",
+            (node, _) => node is ClassDeclarationSyntax or StructDeclarationSyntax,
+            (syntaxContext, _) => syntaxContext
+        );
+        context.RegisterSourceOutput(attributeProvider, Emit);
+    }
+
+    #endregion
+
+    private void Emit(SourceProductionContext sourceContext, GeneratorAttributeSyntaxContext attributeContext)
+    {
+        if (attributeContext.TargetSymbol is not INamedTypeSymbol typeSymbol) return;
+
+        StringBuilder sourceBuilder = new();
+
+        sourceBuilder.AppendLine("#nullable enable");
+
+        var ns = typeSymbol.ContainingNamespace;
+
+        if (!ns.IsGlobalNamespace)
+        {
+            sourceBuilder.AppendLine($"namespace {ns}");
+            sourceBuilder.AppendLine("{");
+        }
+
+
+        sourceBuilder.AppendLine(
+/* lang=c#  */$$"""
+                    {{(typeSymbol.IsStatic ? "static " : "")}}partial {{(typeSymbol.TypeKind == TypeKind.Class ? "class" : "struct")}} {{typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat.WithMemberOptions(SymbolDisplayMemberOptions.None))}}
+                    {
+                """);
+
+        foreach (var attributeData in attributeContext.Attributes)
+        {
+            if (attributeData.ConstructorArguments.Length != 1) continue;
+            if (attributeData.ConstructorArguments[0].Value is not ITypeSymbol targetTypeSymbol) continue;
+            EmitDisposifierBody(sourceBuilder, targetTypeSymbol, typeSymbol.IsStatic, true);
+        }
+
+        sourceBuilder.AppendLine(
+/* lang=c#  */"""    }""");
+
+        if (!ns.IsGlobalNamespace) sourceBuilder.AppendLine($"}} // namespace {ns}");
+
+        var fileNameIdentifier = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
+            .Replace('<', '_').Replace('>', '_');
+
+        sourceContext.AddSource($"{fileNameIdentifier}.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
 
     private void Emit(SourceProductionContext sourceContext, ITypeSymbol?[] types)
     {
         StringBuilder sourceBuilder = new();
 
+        sourceBuilder.AppendLine("#nullable enable");
+
         sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                namespace Disposify
-                {
-                    partial class DisposifyInternal
-                    {
-                """);
+/* lang=c#  */"""
+              namespace Disposify
+              {
+                  partial class DisposifyInternal
+                  {
+              """);
         foreach (var type in types)
         {
             // TODO: generics
-            var fqName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var disposifierName = $"{type.ToDisplayString(FullyQualifiedNoGlobalNamespace)}Disposifier";
+            var fqName = type!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var disposifierName =
+                $"{type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}Disposifier";
             sourceBuilder.AppendLine(
 /* lang=c#  */$$"""
                         public static global::Disposify.Generated.{{disposifierName}} Disposify(this {{fqName}}? target) => new global::Disposify.Generated.{{disposifierName}}(target);
@@ -71,72 +122,80 @@ public class DisposifierGenerator : IIncrementalGenerator
         }
 
         sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                    }
-                }
-                """);
+/* lang=c#  */"""
+                  }
+              }
+              """);
 
 
         sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                namespace Disposify.Generated
-                {
-                """);
+/* lang=c#  */"""
+              namespace Disposify.Generated
+              {
+              """);
         foreach (var type in types)
         {
             // TODO: generics
-            var fqName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            if (!type.ContainingNamespace.IsGlobalNamespace)
-            {
+            if (!type!.ContainingNamespace.IsGlobalNamespace)
                 sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                    namespace {{type.ContainingNamespace}}
-                    {
-                """);
-            }
+                    /* lang=c#  */
+                    $$"""
+                          namespace {{type.ContainingNamespace}}
+                          {
+                      """);
 
             sourceBuilder.AppendLine(
 /* lang=c#  */$$"""
                         internal readonly struct {{type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}}Disposifier
                         {
-                            private readonly {{fqName}} Target;
-                            public {{type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}}Disposifier({{fqName}} target) => Target = target;
-                            
                 """);
 
-            foreach (var eventSymbol in type.GetMembers().OfType<IEventSymbol>())
-            {
-                var lhs = eventSymbol.IsStatic ? $"{fqName}.{eventSymbol.Name}" : $"Target.{eventSymbol.Name}";
-                sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                            public global::Disposify.Disposable {{eventSymbol.Name}}({{eventSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}} @delegate)
-                            {
-                                {{lhs}} += @delegate;
-                                return global::Disposify.Disposable.Create(Target, @delegate, static (Target, @delegate) => {{lhs}} -= @delegate);
-                            }
-                """);
-            }
+            EmitDisposifierBody(sourceBuilder, type, false, false);
 
             sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                        }
-                """);
+/* lang=c#  */"""        }""");
             if (!type.ContainingNamespace.IsGlobalNamespace)
-            {
                 sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                    } // namespace {{type.ContainingNamespace}}
-                """);
-            }
+                    /* lang=c#  */
+                    $$"""
+                          } // namespace {{type.ContainingNamespace}}
+                      """);
         }
 
         sourceBuilder.AppendLine(
-/* lang=c#  */$$"""
-                } // namespace Disposify.Generated
-                """);
+/* lang=c#  */"""} // namespace Disposify.Generated""");
 
-        sourceContext.AddSource($"Disposifiers.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+        sourceContext.AddSource("Disposifiers.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
+
+    private static void EmitDisposifierBody(StringBuilder sourceBuilder, ITypeSymbol type, bool isStatic,
+        bool emitStaticAsStatic)
+    {
+        var fqName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        if (!isStatic)
+            sourceBuilder.AppendLine(
+                /* lang=c#  */
+                $$"""
+                              private readonly {{fqName}}? Target;
+                              public {{type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}}Disposifier({{fqName}}? target) => Target = target;
+
+                  """);
+
+        foreach (var eventSymbol in type.GetMembers().OfType<IEventSymbol>())
+        {
+            if (isStatic && !eventSymbol.IsStatic) continue;
+            var isEventStatic = eventSymbol.IsStatic;
+            sourceBuilder.AppendLine(
+/* lang=c#  */$$"""
+                            public {{(isEventStatic && emitStaticAsStatic ? "static " : "")}}global::Disposify.Disposable {{eventSymbol.Name}}({{eventSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}} @delegate)
+                            {
+                                {{(isEventStatic ? $"{fqName}.{eventSymbol.Name}" : $"Target!.{eventSymbol.Name}")}} += @delegate;
+                                return global::Disposify.Disposable.Create({{(isEventStatic ? "(object?)null" : "Target")}}, @delegate, static ({{(isEventStatic ? "_" : "target")}}, @delegate) => {{(isEventStatic ? $"{fqName}.{eventSymbol.Name}" : $"target.{eventSymbol.Name}")}} -= @delegate);
+                            }
+                """);
+        }
+    }
+
 
     private static ITypeSymbol? GetDisposifiedType(
         GeneratorSyntaxContext context, CancellationToken ct)
