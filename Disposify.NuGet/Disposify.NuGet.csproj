@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <NuspecFile>Disposify.nuspec</NuspecFile>
+        <NuspecProperties>
+            Configuration=$(Configuration);
+        </NuspecProperties>
+        <Description>Disposify is a source generator to subscribe / unsubscribe C# events with using-IDisposable pattern.</Description>
+        <RepositoryUrl>https://github.com/ruccho/Disposify</RepositoryUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Disposify.Generators\Disposify.Generators.csproj" Private="true"/>
+        <ProjectReference Include="..\Disposify\Disposify.csproj" Private="true"/>
+    </ItemGroup>
+
+</Project>
