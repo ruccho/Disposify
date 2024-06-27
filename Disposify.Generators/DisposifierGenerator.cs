@@ -90,8 +90,10 @@ public class DisposifierGenerator : IIncrementalGenerator
 
         if (!ns.IsGlobalNamespace) sourceBuilder.AppendLine($"}} // namespace {ns}");
 
-        var fileNameIdentifier = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
-            .Replace('<', '_').Replace('>', '_');
+        var fileNameIdentifier = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            .Substring("global::".Length)
+            .Replace('<', '_')
+            .Replace('>', '_');
 
         sourceContext.AddSource($"{fileNameIdentifier}.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
