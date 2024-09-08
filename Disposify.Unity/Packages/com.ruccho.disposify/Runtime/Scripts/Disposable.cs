@@ -63,7 +63,7 @@ namespace Disposify
 
         public void Dispose()
         {
-            core.Dispose(version);
+            core?.Dispose(version);
         }
 
         private class DisposableCore
