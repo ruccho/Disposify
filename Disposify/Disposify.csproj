@@ -11,7 +11,7 @@
         <Description>Disposify is a source generator to subscribe / unsubscribe C# events with using-IDisposable pattern.</Description>
         <RepositoryUrl>https://github.com/ruccho/Disposify</RepositoryUrl>
         <Authors>ruccho</Authors>
-
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
