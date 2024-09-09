@@ -96,7 +96,8 @@ public class C1
     protected event Func<int, int>? SomeEvent2;
     protected internal event Func<int, int>? SomeEvent3;
     private protected event Func<int, int>? SomeEvent4;
-    internal event Func<int, int>? SomeEvent6;
+    internal event Func<int, int>? SomeEvent5;
+    public event Func<string?, string?>? SomeEvent6;
 
     public static int InvokeStatic(int a)
     {
