@@ -5,10 +5,24 @@
         <Nullable>disable</Nullable>
         <LangVersion>9</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <IsPackable>true</IsPackable>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>Disposify is a source generator to subscribe / unsubscribe C# events with using-IDisposable pattern.</Description>
+        <RepositoryUrl>https://github.com/ruccho/Disposify</RepositoryUrl>
+        <Authors>ruccho</Authors>
+
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="../Disposify.Unity/Packages/com.ruccho.disposify/Runtime/Scripts/**/*.cs" Link="."/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Disposify.Generators\Disposify.Generators.csproj" Private="true" PrivateAssets="all" OutputItemType="Analyzer"/>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="bin\$(Configuration)\netstandard2.1\Disposify.dll" Pack="true" PackagePath="lib\netstandard2.1\" />
+        <None Include="bin\$(Configuration)\netstandard2.1\Disposify.Generators.dll" Pack="true" PackagePath="analyzers\dotnet\cs\" />
     </ItemGroup>
 
 </Project>
