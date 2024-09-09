@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify", "Disposify\Disp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify.Tests", "Disposify.Tests\Disposify.Tests.csproj", "{B3E42A57-1498-4EE2-A443-C22A2777CFB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disposify.NuGet", "Disposify.NuGet\Disposify.NuGet.csproj", "{3EFDA1B8-F5BC-4666-B767-F3B590072B65}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3E42A57-1498-4EE2-A443-C22A2777CFB6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3EFDA1B8-F5BC-4666-B767-F3B590072B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EFDA1B8-F5BC-4666-B767-F3B590072B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3EFDA1B8-F5BC-4666-B767-F3B590072B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3EFDA1B8-F5BC-4666-B767-F3B590072B65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
