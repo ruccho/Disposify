@@ -19,4 +19,4 @@ jobs:
       - name: Build
         run: dotnet build -c Release -p:Version=${{ env.VERSION }} --no-restore
       - name: Publish
-        run: dotnet nuget push Disposify/bin/Release/Disposify.${{ env.VERSION }}.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push Disposify/bin/Release/Disposify.${{ env.VERSION }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
