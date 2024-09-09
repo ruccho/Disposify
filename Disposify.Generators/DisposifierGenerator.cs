@@ -197,9 +197,11 @@ public class DisposifierGenerator : IIncrementalGenerator
         {
             if (isStatic && !eventSymbol.IsStatic) continue;
             var isEventStatic = eventSymbol.IsStatic;
+            var eventType = eventSymbol.Type;
+            var eventTypeWithoutNullable = eventType.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
             sourceBuilder.AppendLine(
 /* lang=c#  */$$"""
-                            public {{(isEventStatic && emitStaticAsStatic ? "static " : "")}}global::Disposify.Disposable {{eventSymbol.Name}}({{eventSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}} @delegate)
+                            public {{(isEventStatic && emitStaticAsStatic ? "static " : "")}}global::Disposify.Disposable {{eventSymbol.Name}}({{eventTypeWithoutNullable.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier))}} @delegate)
                             {
                                 {{(isEventStatic ? $"{fqName}.{eventSymbol.Name}" : $"Target!.{eventSymbol.Name}")}} += @delegate;
                                 return global::Disposify.Disposable.Create({{(isEventStatic ? "(object?)null" : "Target")}}, @delegate, static ({{(isEventStatic ? "_" : "target")}}, @delegate) => {{(isEventStatic ? $"{fqName}.{eventSymbol.Name}" : $"target.{eventSymbol.Name}")}} -= @delegate);
