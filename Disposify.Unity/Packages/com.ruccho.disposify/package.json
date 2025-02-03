@@ -1,6 +1,6 @@
 ﻿{
   "name": "com.ruccho.disposify",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "Disposify",
   "description": "Subscribe C# events with IDisposable!",
   "unity": "2022.3",
