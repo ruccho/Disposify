@@ -31,11 +31,13 @@ public class DisposifierGenerator : IIncrementalGenerator
 
         var provider = context.SyntaxProvider
             .CreateSyntaxProvider(
-                (s, _) =>
+                (s, _) => s is InvocationExpressionSyntax
                 {
-                    if (s is not InvocationExpressionSyntax node) return false;
-                    if (node.ArgumentList.Arguments.Count != 0) return false;
-                    return true;
+                    ArgumentList.Arguments.Count: 0,
+                    Expression: MemberAccessExpressionSyntax
+                    {
+                        Name.Identifier.ValueText: "Disposify"
+                    }
                 },
                 GetDisposifiedType)
             .Where(t => t is { TypeKind: TypeKind.Class } and not INamedTypeSymbol { IsGenericType: true });
